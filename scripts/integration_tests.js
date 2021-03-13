@@ -1,4 +1,4 @@
-import {Coin, LocalTerra, MsgExecuteContract, MsgSend} from "@terra-money/terra.js";
+import {Coin, LocalTerra, MsgExecuteContract} from "@terra-money/terra.js";
 import {deploy, perform_transaction, query_contract} from "./helpers.mjs";
 
 async function test_reserve_query(terra, address, symbol) {
@@ -52,28 +52,14 @@ async function test_redeem(terra, wallet, lp_contract_address) {
   let reserve_query_msg = {"reserve": {"symbol": "luna"}};
   let { ma_token_address } = await query_contract(terra, lp_contract_address, reserve_query_msg);
 
-  /*
   const execute_msg = {
     "send": {
       "contract": lp_contract_address,
       "amount": "500",
-      "msg": { 
-        "receive_msg": { 
-          "redeem": {
-            "id": "luna"
-          }
-        }
-      }
+      "msg": toEncodedBinary({ "redeem": {"id": "luna"} }),
     }
   };
-  */
-  const execute_msg = {
-    "send": {
-      "contract": lp_contract_address,
-      "amount": "500",
-      "msg": toEncodedBinary({ "redeem": {"id": "luna"} }),  
-    }
-  };
+
 
   const send_msg = new MsgExecuteContract(wallet.key.accAddress, ma_token_address, execute_msg);
   const res = await perform_transaction(terra, wallet, send_msg);
@@ -90,6 +76,7 @@ function toEncodedBinary(object) {
 
 const terra = new LocalTerra();
 const wallet = terra.wallets.test1;
+
 const deploy_result = await deploy(terra, wallet);
 const lp_contract_address = deploy_result;
 
